@@ -1,0 +1,59 @@
+{
+  "moves": [
+    {
+      "name": "Fireblast",
+      "attributes": {
+        "type": "damage",
+        "hp_cost": 0,
+        "mp_cost": 5,
+        "power": 1,
+        "element": "fire",
+        "target": "enemy"
+      }
+    },
+    {
+      "name": "Fireblast All",
+      "attributes": {
+        "type": "damage",
+        "hp_cost": 0,
+        "mp_cost": 10,
+        "power": 1,
+        "element": "fire",
+        "target": "enemy"
+      }
+    },
+    {
+      "name": "Punch",
+      "attributes": {
+        "type": "damage",
+        "hp_cost": 0,
+        "mp_cost": 0,
+        "power": 1,
+        "element": "phys",
+        "target": "enemy"
+      }
+    },
+    {
+      "name": "Healing",
+      "attributes": {
+        "type": "heal",
+        "hp_cost": 0,
+        "mp_cost": 5,
+        "power": 1,
+        "element": "",
+        "target": "player"
+      }
+    },
+    {
+      "name": "Guard",
+      "attributes": {
+        "type": "defend",
+        "hp_cost": 0,
+        "mp_cost": 0,
+        "power": 1,
+        "element": "none",
+        "target": "self"
+      }
+    }
+  ]
+}

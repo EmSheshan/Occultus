@@ -1,0 +1,91 @@
+{
+  "monsters": [
+    {
+      "name": "Omniowl",
+      "attributes": {
+        "max_hp": 30,
+        "max_mp": 100,
+        "strength": 25,
+        "magic": 80,
+        "vitality": 20,
+        "agility": 50,
+        "luck": 70,
+        "moves": ["Fireblast"]
+      },
+      "weakness": {
+        "phys": "neutral",
+        "fire": "weak",
+        "water": "resist",
+        "air": "absorb",
+        "earth": "nullify",
+        "psychic": "reflect"
+      }
+    },
+    {
+      "name": "Bathycanth",
+      "attributes": {
+        "max_hp": 70,
+        "max_mp": 20,
+        "strength": 25,
+        "magic": 10,
+        "vitality": 40,
+        "agility": 30,
+        "luck": 600,
+        "moves": ["Punch"]
+      },
+      "weakness": {
+        "phys": "neutral",
+        "fire": "weak",
+        "water": "resist",
+        "air": "absorb",
+        "earth": "nullify",
+        "psychic": "reflect"
+      }
+    },
+
+    {
+      "name": "Black Unicorn",
+      "attributes": {
+        "max_hp": 60,
+        "max_mp": 60,
+        "strength": 40,
+        "magic": 60,
+        "vitality": 40,
+        "agility": 50,
+        "luck": 100,
+        "moves": ["Punch", "Fireblast", "Healing"]
+      },
+      "weakness": {
+        "phys": "neutral",
+        "fire": "weak",
+        "water": "resist",
+        "air": "absorb",
+        "earth": "nullify",
+        "psychic": "reflect"
+      }
+    },
+    {
+      "name": "Hellpack",
+      "attributes": {
+        "max_hp": 60,
+        "max_mp": 60,
+        "strength": 40,
+        "magic": 60,
+        "vitality": 40,
+        "agility": 50,
+        "luck": 100,
+        "moves": ["Punch", "Fireblast", "Fireblast All"]
+      },
+      "weakness": {
+        "phys": "neutral",
+        "fire": "weak",
+        "water": "resist",
+        "air": "absorb",
+        "earth": "nullify",
+        "psychic": "reflect"
+      }
+      }
+
+
+  ]
+}
