@@ -16,7 +16,6 @@ Gameplay:
 Visuals:
 - [ ] Add red flash when enemy is damaged
 - [ ] Add enemy defeat animation
-- [ ] 
 
 Audio:
 - [ ] Compose an original track
