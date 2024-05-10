@@ -10,15 +10,16 @@
         "vitality": 20,
         "agility": 50,
         "luck": 70,
-        "moves": ["Fireblast"]
+        "moves": ["Punch", "Fireblast"]
       },
       "weakness": {
         "phys": "neutral",
-        "fire": "weak",
-        "water": "resist",
-        "air": "absorb",
-        "earth": "nullify",
-        "psychic": "reflect"
+        "brimstone": "neutral",
+        "mercury": "neutral",
+        "miasma": "weak",
+        "sanguine": "neutral",
+        "azoth": "neutral",
+        "nigredo": "neutral"
       }
     },
     {
@@ -35,11 +36,12 @@
       },
       "weakness": {
         "phys": "neutral",
-        "fire": "weak",
-        "water": "resist",
-        "air": "absorb",
-        "earth": "nullify",
-        "psychic": "reflect"
+        "brimstone": "absorb",
+        "mercury": "weak",
+        "miasma": "neutral",
+        "sanguine": "neutral",
+        "azoth": "neutral",
+        "nigredo": "neutral"
       }
     },
 
@@ -53,15 +55,16 @@
         "vitality": 40,
         "agility": 50,
         "luck": 100,
-        "moves": ["Punch", "Fireblast", "Healing"]
+        "moves": ["Punch", "Healing"]
       },
       "weakness": {
         "phys": "neutral",
-        "fire": "weak",
-        "water": "resist",
-        "air": "absorb",
-        "earth": "nullify",
-        "psychic": "reflect"
+        "brimstone": "absorb",
+        "mercury": "weak",
+        "miasma": "neutral",
+        "sanguine": "neutral",
+        "azoth": "neutral",
+        "nigredo": "neutral"
       }
     },
     {
@@ -78,11 +81,12 @@
       },
       "weakness": {
         "phys": "neutral",
-        "fire": "absorb",
-        "water": "weak",
-        "air": "neutral",
-        "earth": "neutral",
-        "psychic": "neutral"
+        "brimstone": "absorb",
+        "mercury": "weak",
+        "miasma": "neutral",
+        "sanguine": "neutral",
+        "azoth": "neutral",
+        "nigredo": "neutral"
       }
       }
   ]
