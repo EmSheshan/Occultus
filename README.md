@@ -11,7 +11,7 @@ Gameplay:
 - [ ] Make a new battle start when the previous one is won
 - [ ] Add capture mechanic
 - [ ] Add crit rate modifiers to attacks
-- [ ] Make hp cost for attacks proportional to total health
+- [x] Make hp cost for attacks proportional to total health
 - [x] Make enemies able to self-heal
 
 Visuals:
@@ -26,7 +26,8 @@ Audio:
 
 Fixes:
 - [x] Rename elements
-- [ ] Fix press turn system
+- [x] Fix press turn system
 - [ ] Fix monster stats so that starting hp/mp is higher and that the level disparity is less
-- [ ] Multi-target attacks break if they get a kill
-- [ ] Make it so you can exit out of the game
+- [ ] Fix Multi-target attacks breaking if they get a kill
+- [x] Make it so you can exit out of the game
+- [ ] Add backspace to cancel out of menu selection

@@ -33,6 +33,17 @@
         "target": "enemy"
       }
     },
+        {
+      "name": "Super Punch",
+      "attributes": {
+        "type": "damage",
+        "hp_cost": 0.25,
+        "mp_cost": 0,
+        "power": 1.5,
+        "element": "phys",
+        "target": "enemy"
+      }
+    },
     {
       "name": "Healing",
       "attributes": {
