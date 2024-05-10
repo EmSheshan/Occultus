@@ -19,7 +19,7 @@
         "mp_cost": 10,
         "power": 1,
         "element": "fire",
-        "target": "enemy"
+        "target": "enemy_all"
       }
     },
     {
