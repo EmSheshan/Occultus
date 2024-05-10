@@ -7,7 +7,7 @@
         "hp_cost": 0,
         "mp_cost": 5,
         "power": 1,
-        "element": "fire",
+        "element": "brimstone",
         "target": "enemy"
       }
     },
@@ -18,7 +18,7 @@
         "hp_cost": 0,
         "mp_cost": 10,
         "power": 1,
-        "element": "fire",
+        "element": "brimstone",
         "target": "enemy_all"
       }
     },
@@ -51,7 +51,7 @@
         "hp_cost": 0,
         "mp_cost": 0,
         "power": 1,
-        "element": "none",
+        "element": "",
         "target": "self"
       }
     }

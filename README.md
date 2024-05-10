@@ -12,11 +12,11 @@ Gameplay:
 - [ ] Add capture mechanic
 - [ ] Add crit rate modifiers to attacks
 - [ ] Make hp cost for attacks proportional to total health
-- [ ] Make enemies able to self heal
+- [x] Make enemies able to self-heal
 
 Visuals:
-- [ ] Increase size of monster sprites
-- [ ] Add red flash when enemy is damaged
+- [x] Increase size of monster sprites
+- [x] Add red flash when enemy is damaged
 - [ ] Add enemy defeat animation
 
 Audio:
@@ -25,7 +25,8 @@ Audio:
 - [ ] Add sound effects
 
 Fixes:
-- [ ] Rename elements
+- [x] Rename elements
 - [ ] Fix press turn system
 - [ ] Fix monster stats so that starting hp/mp is higher and that the level disparity is less
 - [ ] Multi-target attacks break if they get a kill
+- [ ] Make it so you can exit out of the game

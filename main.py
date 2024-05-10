@@ -14,7 +14,7 @@ fps = 60
 fpsClock = pygame.time.Clock()
 
 SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
-# SCREEN_WIDTH, SCREEN_HEIGHT = 1366, 768
+SCREEN_WIDTH, SCREEN_HEIGHT = 1366, 768
 # SCREEN_WIDTH, SCREEN_HEIGHT = 960, 540
 MARGIN = SCREEN_HEIGHT//54
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -281,10 +281,10 @@ characters = [
     monster.Monster(1, monster_refs["Black Unicorn"], 12),
 ]
 enemies = [
-    monster.Monster(0, monster_refs["Hellpack"], 10),
-    monster.Monster(1, monster_refs["Hellpack"], 10),
-    monster.Monster(2, monster_refs["Hellpack"], 10),
-    monster.Monster(3, monster_refs["Hellpack"], 10)
+    monster.Monster(0, monster_refs["Black Unicorn"], 10),
+    monster.Monster(1, monster_refs["Black Unicorn"], 10),
+    monster.Monster(2, monster_refs["Black Unicorn"], 10),
+    monster.Monster(3, monster_refs["Black Unicorn"], 10)
 ]
 
 # Define game states
@@ -305,6 +305,8 @@ ENEMY_DEAL_DAMAGE = 13
 ENEMY_TURN = 14
 ENEMY_CALCULATE_DAMAGE = 15
 ENEMY_CRITICAL_HIT = 16
+ENEMY_HEAL_TEXT = 17
+ENEMY_DEAL_HEALING = 18
 
 current_state = 0
 press_turn_count = 0
@@ -463,7 +465,7 @@ while running:
         if render_primary_text(attack_message):
             if enemies[enemy_index].hp == 0:
                 current_state = ENEMY_DEFEAT
-            elif enemies_to_hit != 1:
+            elif enemies_to_hit > 1:
                 enemies_to_hit -= 1
                 is_damage_calculated = False
                 attack_damage = 0
@@ -504,14 +506,21 @@ while running:
             if enemy_move is None:
                 enemy_move = random.choice([move for move in enemy.moves[:-1]])  # enemy selects random move sans Guard
                 enemy_move = move_dict.get(enemy_move)
-            if enemy_move.target == "enemy":
-                if target_character is None:
+            if enemy_move.type == "damage":
+                if enemy_move.target == "enemy":
                     target_character = random.choice([character for character in characters if character.hp > 0])
                     current_state = ENEMY_CALCULATE_DAMAGE
-            elif enemy_move.target == "enemy_all":
-                characters_to_hit = len(characters)
-                target_character = characters[len(characters) - characters_to_hit]
-                current_state = ENEMY_CALCULATE_DAMAGE
+                elif enemy_move.target == "enemy_all":
+                    characters_to_hit = len(characters)
+                    target_character = characters[len(characters) - characters_to_hit]
+                    current_state = ENEMY_CALCULATE_DAMAGE
+            elif enemy_move.type == "heal":
+                characters_needing_healing = [character for character in enemies if character.hp < character.max_hp]
+                if characters_needing_healing:
+                    target_character = random.choice(characters_needing_healing)
+                    current_state = ENEMY_HEAL_TEXT
+                else:
+                    enemy_move = None
         else:
             current_state = PLAYER_TURN_START
 
@@ -547,6 +556,17 @@ while running:
         if all(character.hp <= 0 for character in characters):
             render_primary_text("Defeated!", False)
             current_state = DEFEAT_STATE
+
+    elif current_state == ENEMY_HEAL_TEXT:
+        if render_primary_text(f"{enemy.name} heals {enemies[target_index].name} with {enemy_move.name}."):
+            current_state = ENEMY_DEAL_HEALING
+
+    elif current_state == ENEMY_DEAL_HEALING:
+        attack_message = heal(enemy, enemies[target_index], enemy_move.power)
+        if render_primary_text(attack_message):
+            press_turn_count -= 2
+            current_enemy = (current_enemy + 1) % len(enemies)
+            current_state = ENEMY_TURN
 
     elif current_state == VICTORY_STATE:
         render_primary_text("You win!")
