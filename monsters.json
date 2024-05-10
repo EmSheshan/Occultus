@@ -67,25 +67,23 @@
     {
       "name": "Hellpack",
       "attributes": {
-        "max_hp": 60,
-        "max_mp": 60,
-        "strength": 40,
+        "max_hp": 40,
+        "max_mp": 100,
+        "strength": 60,
         "magic": 60,
-        "vitality": 40,
-        "agility": 50,
-        "luck": 100,
+        "vitality": 30,
+        "agility": 70,
+        "luck": 20,
         "moves": ["Punch", "Fireblast", "Fireblast All"]
       },
       "weakness": {
         "phys": "neutral",
-        "fire": "weak",
-        "water": "resist",
-        "air": "absorb",
-        "earth": "nullify",
-        "psychic": "reflect"
+        "fire": "absorb",
+        "water": "weak",
+        "air": "neutral",
+        "earth": "neutral",
+        "psychic": "neutral"
       }
       }
-
-
   ]
 }

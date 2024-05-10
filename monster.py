@@ -39,7 +39,10 @@ class Monster:
         self.weakness = monster_ref.weakness
         self.is_defending = False
 
-        self.sprite = monster_ref.sprite
+        self.original_sprite = monster_ref.sprite
+        self.tinted_sprite = self.original_sprite.copy()  # Create a copy of the original sprite
+        self.tinted_sprite.fill((255, 0, 0, 100), special_flags=pygame.BLEND_RGBA_MULT)  # Tint the copy
+        self.sprite = self.original_sprite
         self.shake_timer = 0
         self.sprite_y = 0  # Initial vertical position
         self.sprite_x = 0
@@ -51,6 +54,7 @@ class Monster:
         # Check if the enemy is currently shaking
         if self.shake_timer == 0:
             self.sprite_x = 0
+            self.sprite = self.original_sprite
         elif self.shake_timer > 0:
             # Calculate the displacement based on a sine wave function
             displacement = 12 * math.sin(self.shake_timer * 2 * math.pi / 12)
@@ -58,5 +62,6 @@ class Monster:
             self.sprite_x += displacement
             # Decrease the shake timer
             self.shake_timer -= 1
+            self.sprite = self.tinted_sprite
 
 
