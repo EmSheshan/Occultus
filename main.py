@@ -31,6 +31,14 @@ pygame.mixer.music.load(mp3_file)
 pygame.mixer.music.play()
 pygame.mixer.music.set_volume(0.5)
 
+# Load sound effects
+click_sound = pygame.mixer.Sound("assets/click.wav")
+defeat_sound = pygame.mixer.Sound("assets/explosion.wav")
+hurt_sound = pygame.mixer.Sound("assets/hitHurt.wav")
+spell_sound = pygame.mixer.Sound("assets/laserShoot.wav")
+heal_sound = pygame.mixer.Sound("assets/powerUp.wav")
+
+
 # Define the two colors between which SELECT_COLOR will pulsate
 SELECT_COLOR1 = (255, 80, 50)
 SELECT_COLOR2 = (255, 50, 80)
@@ -81,6 +89,7 @@ def render_primary_text(text, confirm=True):
                     sys.exit()
                 if events.key == K_SPACE or events.key == K_RETURN:
                     return True
+
             else:
                 return False
 
@@ -128,6 +137,7 @@ def choose_action(char, menu_option):
             elif events.key == K_DOWN:
                 menu_option = (menu_option + 1) % len(char.moves)
             elif events.key == K_SPACE or events.key == K_RETURN:
+                click_sound.play()
                 return menu_option, True
     return menu_option, False
 
@@ -157,6 +167,7 @@ def choose_target(targets, menu_option):
             elif events.key == K_DOWN:
                 menu_option = (menu_option + 1) % len(targets)
             elif events.key == K_SPACE or events.key == K_RETURN:
+                click_sound.play()
                 return menu_option, True
     return menu_option, False
 
@@ -181,17 +192,24 @@ class Monster:
 def calculate_damage(attacker, attack_move, whole_press_turn, half_press_turn):
     is_crit = False
     if attack_move.element == "phys":
+        hurt_sound.play()
         damage = int(attacker.strength * attack_move.power)
         # Check for critical hit
-        if random.random() < 0.05 + attacker.luck / 100:
-            damage *= 2
+        if random.random() < attack_move.critrate * 0.05 + attacker.luck / 100:
+            damage = int(damage * 1.5)
             if whole_press_turn > 0:
                 whole_press_turn -= 1
                 half_press_turn += 1
             else:
                 half_press_turn -= 1
             is_crit = True
+        else:
+            if half_press_turn > 0:
+                half_press_turn -= 1
+            else:
+                whole_press_turn -= 1
     else:
+        spell_sound.play()
         damage = attacker.magic * attack_move.power
     return whole_press_turn, half_press_turn, int(damage), is_crit
 
@@ -201,14 +219,14 @@ def attack(self, target, damage, element, whole_press_turn, half_press_turn, is_
     # Check if the target reflects element
     if target.weakness[element] == "reflect":
         # Inflict damage on self equal to the damage that would have been dealt
-        damage_taken = max((damage - math.floor(target.vitality // 1.5)), 1)
+        damage_taken = max(damage - target.vitality // 1.8, 1)
         damage_taken = int(damage_taken)
         self.hp -= damage_taken
         message = f"{target.name} reflected the attack back at {self.name} for {damage_taken} damage!"
         whole_press_turn = 0
         half_press_turn = 0
     elif target.weakness[element] == "absorb":
-        damage_taken = max((damage - math.floor(target.vitality // 1.5)), 1)
+        damage_taken = max(damage - target.vitality // 1.8, 1)
         whole_press_turn = 0
         half_press_turn = 0
         target.hp += int(damage_taken)
@@ -229,7 +247,7 @@ def attack(self, target, damage, element, whole_press_turn, half_press_turn, is_
         if target.is_defending:
             damage = damage // 1.5
         if target.weakness[element] == "weak" and not target.is_defending:
-            damage_taken = max((damage - math.floor(target.vitality // 1.5)) * 2, 1)
+            damage_taken = max(damage - target.vitality // 1.8 * 2, 1)
             message = f"Hit {target.name}'s weakness! "
             if not is_crit:
                 if whole_press_turn > 0:
@@ -244,6 +262,7 @@ def attack(self, target, damage, element, whole_press_turn, half_press_turn, is_
         damage_taken = int(damage_taken)
         target.hp -= int(damage_taken)
         message += f"{target.name} took {damage_taken} damage!"
+        target.shake_timer = 15
 
         if target.hp < 0:
             target.hp = 0
@@ -294,6 +313,7 @@ for move_data in data["moves"]:
         hp_cost=move_data["attributes"]["hp_cost"],
         mp_cost=move_data["attributes"]["mp_cost"],
         power=move_data["attributes"]["power"],
+        critrate=move_data["attributes"]["critrate"],
         element=move_data["attributes"]["element"],
         target=move_data["attributes"]["target"]
     )
@@ -302,13 +322,13 @@ for move_data in data["moves"]:
 # Define Characters and Enemies
 characters = [
     monster.Monster(0, monster_refs["Hellpack"], 12),
-    monster.Monster(1, monster_refs["Black Unicorn"], 12),
+    monster.Monster(1, monster_refs["Hellpack"], 12),
 ]
 enemies = [
-    monster.Monster(0, monster_refs["Hellpack"], 10),
-    monster.Monster(1, monster_refs["Omniowl"], 10),
-    monster.Monster(2, monster_refs["Bathycanth"], 10),
-    monster.Monster(3, monster_refs["Black Unicorn"], 10)
+    monster.Monster(0, monster_refs["Hellpack"], 12),
+    monster.Monster(1, monster_refs["Hellpack"], 12),
+    monster.Monster(2, monster_refs["Hellpack"], 12),
+    monster.Monster(3, monster_refs["Hellpack"], 12)
 ]
 
 # Define game states
@@ -371,9 +391,9 @@ while running:
         enemy_sprite.update_position()     # enemy movement animation
 
     if current_state == PLAYER_TURN_START:
+        whole_press_turn_count = 0
+        half_press_turn_count = 0
         if render_primary_text("-- Player's turn --"):
-            whole_press_turn_count = 0
-            half_press_turn_count = 0
             for character in characters:
                 character.is_defending = False
                 if character.hp != 0:
@@ -390,7 +410,7 @@ while running:
 
     elif current_state == SELECT_MOVE:
         selected_action = None
-        if whole_press_turn_count > 0 or half_press_turn_count > 0:
+        if whole_press_turn_count + half_press_turn_count > 0:
             character = characters[current_character]
             if character.hp == 0:
                 current_character = (current_character + 1) % len(characters)
@@ -413,11 +433,7 @@ while running:
                             else:
                                 whole_press_turn_count -= 1
                                 half_press_turn_count += 1
-                        else:
-                            if whole_press_turn_count > 0:
-                                whole_press_turn_count -= 1
-                            else:
-                                half_press_turn_count -= 1
+
                         selected_option = 0
                         check = False
                     else:
@@ -438,7 +454,6 @@ while running:
                     is_damage_calculated = False
                     attack_damage = 0
                     current_state = PLAYER_CALCULATE_ATTACK
-
             elif selected_move.target == "enemy_all":
                 enemies_to_hit = len(enemies)
                 selected_option = 0
@@ -469,9 +484,10 @@ while running:
                 if is_critical_hit:
                     current_state = PLAYER_CRITICAL_HIT
                 else:
-                    whole_press_turn_count, half_press_turn_count, attack_message = attack(character, selected_target, attack_damage,
-                                                              selected_move.element, whole_press_turn_count, half_press_turn_count, is_critical_hit)
-                    enemies[enemy_index].shake_timer = 15
+                    whole_press_turn_count, half_press_turn_count, attack_message = \
+                        attack(character, selected_target, attack_damage, selected_move.element, whole_press_turn_count,
+                               half_press_turn_count, is_critical_hit)
+
                     current_state = PLAYER_DEAL_DAMAGE
         elif render_primary_text(f"{character.name} attacks {enemies[enemy_index].name} with {selected_move.name}."):
             whole_press_turn_count, half_press_turn_count, attack_damage, is_critical_hit = calculate_damage(
@@ -479,21 +495,25 @@ while running:
             if is_critical_hit:
                 current_state = PLAYER_CRITICAL_HIT
             else:
-                whole_press_turn_count, half_press_turn_count, attack_message = attack(
-                    character, selected_target, attack_damage, selected_move.element, whole_press_turn_count, half_press_turn_count, is_critical_hit)
-                enemies[enemy_index].shake_timer = 15
+                whole_press_turn_count, half_press_turn_count, attack_message = \
+                    attack(character, selected_target, attack_damage, selected_move.element, whole_press_turn_count,
+                           half_press_turn_count, is_critical_hit)
+
                 current_state = PLAYER_DEAL_DAMAGE
 
     elif current_state == PLAYER_CRITICAL_HIT:
         if render_primary_text("Critical Hit!"):
-            whole_press_turn_count, half_press_turn_count, attack_message = attack(
-                character, selected_target, attack_damage, selected_move.element, whole_press_turn_count, half_press_turn_count, is_critical_hit)
-            enemies[enemy_index].shake_timer = 15
+            whole_press_turn_count, half_press_turn_count, attack_message = \
+                attack(character, selected_target, attack_damage, selected_move.element, whole_press_turn_count,
+                       half_press_turn_count, is_critical_hit)
+
             current_state = PLAYER_DEAL_DAMAGE
 
     elif current_state == PLAYER_DEAL_DAMAGE:
         if render_primary_text(attack_message):
             if enemies[enemy_index].hp == 0:
+                defeat_sound.play()
+                enemies[enemy_index].fadeout = True
                 current_state = ENEMY_DEFEAT
             elif enemies_to_hit > 1:
                 enemies_to_hit -= 1
@@ -515,6 +535,7 @@ while running:
 
     elif current_state == HEAL_TEXT:
         if render_primary_text(f"{character.name} heals {characters[target_index].name} with {selected_move.name}."):
+            heal_sound.play()
             current_state = DEAL_HEALING
 
     elif current_state == DEAL_HEALING:
@@ -557,18 +578,21 @@ while running:
 
     elif current_state == ENEMY_CALCULATE_DAMAGE:
         if render_primary_text(f"{enemy.name} attacks {target_character.name} with {enemy_move.name}."):
-            whole_press_turn_count, half_press_turn_count, attack_damage, is_critical_hit = calculate_damage(enemy, enemy_move, whole_press_turn_count, half_press_turn_count,)
+            whole_press_turn_count, half_press_turn_count, attack_damage, is_critical_hit = \
+                calculate_damage(enemy, enemy_move, whole_press_turn_count, half_press_turn_count,)
             if is_critical_hit:
                 current_state = ENEMY_CRITICAL_HIT
             else:
                 whole_press_turn_count, half_press_turn_count, attack_message = attack(
-                    enemy, target_character, attack_damage, enemy_move.element, whole_press_turn_count, half_press_turn_count, is_critical_hit)
+                    enemy, target_character, attack_damage, enemy_move.element, whole_press_turn_count,
+                    half_press_turn_count, is_critical_hit)
                 current_state = ENEMY_DEAL_DAMAGE
 
     elif current_state == ENEMY_CRITICAL_HIT:
         if render_primary_text("Critical Hit!"):
-            whole_press_turn_count, half_press_turn_count, attack_message = attack(character, target_character, attack_damage, enemy_move.element,
-                                                      whole_press_turn_count, half_press_turn_count, is_critical_hit)
+            whole_press_turn_count, half_press_turn_count, attack_message = \
+                attack(character, target_character, attack_damage, enemy_move.element, whole_press_turn_count,
+                       half_press_turn_count, is_critical_hit)
             current_state = ENEMY_DEAL_DAMAGE
 
     elif current_state == ENEMY_DEAL_DAMAGE:
@@ -607,10 +631,12 @@ while running:
 
     elif current_state == VICTORY_STATE:
         render_primary_text("You win!")
+        pygame.mixer.music.stop()
         pass
 
     elif current_state == DEFEAT_STATE:
         render_primary_text("Game Over")
+        pygame.mixer.music.stop()
         pass
 
     for event in pygame.event.get():

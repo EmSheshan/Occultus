@@ -41,11 +41,12 @@ class Monster:
 
         self.original_sprite = monster_ref.sprite
         self.tinted_sprite = self.original_sprite.copy()  # Create a copy of the original sprite
-        self.tinted_sprite.fill((255, 0, 0, 100), special_flags=pygame.BLEND_RGBA_MULT)  # Tint the copy
+        self.tinted_sprite.fill((255, 0, 60, 100), special_flags=pygame.BLEND_RGBA_MULT)  # Tint the copy
         self.sprite = self.original_sprite
         self.shake_timer = 0
         self.sprite_y = 0  # Initial vertical position
         self.sprite_x = 0
+        self.fadeout = False
 
     def update_position(self):
         # Slight vertical bobbing motion
@@ -63,5 +64,18 @@ class Monster:
             # Decrease the shake timer
             self.shake_timer -= 1
             self.sprite = self.tinted_sprite
+
+        # Check if the enemy is dead
+        if self.fadeout:
+            # Darken the sprite and make it slightly more purple
+            self.tinted_sprite.fill((120, 0, 120), special_flags=pygame.BLEND_RGBA_MULT)  # Tint the copy
+            self.sprite = self.tinted_sprite
+
+            # Fade out the tinted sprite
+            alpha = self.tinted_sprite.get_alpha()
+            alpha -= 5  # Adjust the fade speed as needed
+            if alpha <= 0:
+                alpha = 0
+            self.tinted_sprite.set_alpha(alpha)
 
 

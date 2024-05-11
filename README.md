@@ -10,19 +10,21 @@ Gameplay:
 - [ ] Create an encounters table so each fight is randomized
 - [ ] Make a new battle start when the previous one is won
 - [ ] Add capture mechanic
-- [ ] Add crit rate modifiers to attacks
+- [x] Add crit rate modifiers to attacks
 - [x] Make hp cost for attacks proportional to total health
 - [x] Make enemies able to self-heal
 
 Visuals:
 - [x] Increase size of monster sprites
 - [x] Add red flash when enemy is damaged
-- [ ] Add enemy defeat animation
+- [x] Add enemy defeat animation
+- [ ] Add background
+- [ ] Add proper display for enemy stats
 
 Audio:
 - [ ] Compose an original track
 - [x] Set the mixing to half of its current value
-- [ ] Add sound effects
+- [x] Add sound effects
 
 Fixes:
 - [x] Rename elements
@@ -31,3 +33,7 @@ Fixes:
 - [ ] Fix Multi-target attacks breaking if they get a kill
 - [x] Make it so you can exit out of the game
 - [ ] Add backspace to cancel out of menu selection
+- [x] Fix bug where even if you have a half turn you cant act on it
+- [ ] Multitarget attacks can revive dead monsters
+- [ ] Multitarget attacks break press turn system
+- [x] Damage animation plays even if an attack does no damage (nullify, absorb, reflect)
