@@ -77,7 +77,7 @@
         "vitality": 30,
         "agility": 70,
         "luck": 20,
-        "moves": ["Killer Strike", "Punch", "Super Punch", "Fireblast", "Fireblast All"]
+        "moves": ["Punch", "Super Punch", "Fireblast", "Fireblast All"]
       },
       "weakness": {
         "phys": "neutral",

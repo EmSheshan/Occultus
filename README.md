@@ -18,8 +18,10 @@ Visuals:
 - [x] Increase size of monster sprites
 - [x] Add red flash when enemy is damaged
 - [x] Add enemy defeat animation
-- [ ] Add background
-- [ ] Add proper display for enemy stats
+- [x] Add background
+- [ ] Add player character menu tabs
+- [ ] Make it so enemies are highlighted when you 
+- [ ] Add outlines to monster sprites
 
 Audio:
 - [ ] Compose an original track

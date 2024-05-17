@@ -22,6 +22,18 @@ pygame.display.set_caption("Occultus - DEV")
 font_size = round(36 * (SCREEN_WIDTH / 1920))
 font = pygame.font.Font('assets/Mono a Mano.ttf', font_size)
 
+background_image = pygame.image.load("assets/Background.png")
+temple_image = pygame.image.load("assets/Temple.png")
+
+temple_image = pygame.transform.smoothscale(temple_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+
+# Before the game loop
+background_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Create a surface to render the background
+background_surface.blit(background_image, (0, 0))  # Blit the background image onto the surface
+background_surface.blit(temple_image, (0, 0))
+
+
 whole_icon_surface = pygame.image.load('assets/press_icon_full.png')
 half_icon_surface = pygame.image.load('assets/press_icon_half.png')
 
@@ -57,10 +69,8 @@ def pulsate_color():
 
 
 def render_background():
-    screen.fill((20, 20, 40))
-    text_surface = font.render(f"fps: {pygame.time.get_ticks()}", True, (255, 255, 255))
-    text_rect = text_surface.get_rect(bottomright=(SCREEN_WIDTH - MARGIN, SCREEN_HEIGHT - MARGIN))
-    screen.blit(text_surface, text_rect)
+    screen.fill((120, 120, 120))
+    screen.blit(background_surface, (0, 0))
 
 
 def render_health_bars():
@@ -70,8 +80,12 @@ def render_health_bars():
         screen.blit(text_surface, (MARGIN, MARGIN + i * MARGIN*2))
 
     for i, e in enumerate(enemies):
-        text_surface = font.render(f"{e.name} HP: [{e.hp}/{e.max_hp}]", True, (255, 255, 255))
+        text_surface = font.render(f"Current floor: {battle_count}", True, (255, 255, 255))
         screen.blit(text_surface, (SCREEN_WIDTH - text_surface.get_width() - MARGIN, MARGIN + i * MARGIN*2))
+
+    text_surface = font.render(f"fps: {pygame.time.get_ticks()}", True, (255, 255, 255))
+    text_rect = text_surface.get_rect(bottomright=(SCREEN_WIDTH - MARGIN, SCREEN_HEIGHT - MARGIN))
+    screen.blit(text_surface, text_rect)
 
 
 def render_primary_text(text, confirm=True):
@@ -321,13 +335,10 @@ for move_data in data["moves"]:
 
 # Define Characters and Enemies
 characters = [
-    monster.Monster(0, monster_refs["Hellpack"], 12),
+    monster.Monster(0, monster_refs["Hellpack"], 50),
     monster.Monster(1, monster_refs["Hellpack"], 12),
 ]
 enemies = [
-    monster.Monster(0, monster_refs["Hellpack"], 12),
-    monster.Monster(1, monster_refs["Hellpack"], 12),
-    monster.Monster(2, monster_refs["Hellpack"], 12),
     monster.Monster(3, monster_refs["Hellpack"], 12)
 ]
 
@@ -372,13 +383,68 @@ current_enemy = None
 current_message = False
 enemies_to_hit = 0
 characters_to_hit = 0
+battle_count = 1
+background_animation_timer = 0
+
+
+def get_scaled_image(scale_factor):
+    if scale_factor not in scaled_images_cache:
+        scaled_image = pygame.transform.smoothscale(temple_image, (
+            int(temple_image.get_width() * scale_factor),
+            int(temple_image.get_height() * scale_factor)
+        ))
+        scaled_images_cache[scale_factor] = scaled_image
+    return scaled_images_cache[scale_factor]
+
+
+scaled_images_cache = {}
+start_position = 10
+end_position = 0
+start_value = 1
+end_value = 3.5
+num_steps = 10  # Number of steps from start_value to end_value
+
+for i in range(num_steps + 1):
+    scale_factor = 1 + (end_value - 1) * (i / num_steps)
+    scaled_image = pygame.transform.smoothscale(temple_image, (
+        int(temple_image.get_width() * scale_factor),
+        int(temple_image.get_height() * scale_factor)
+    ))
+    scaled_images_cache[scale_factor] = scaled_image
+
 
 # Game loop
 running = True
 while running:
 
     fpsClock.tick(fps)
-    render_background()
+
+    if background_animation_timer > 0:
+
+        # Calculate the output using linear interpolation
+        output = start_value + (end_value - start_value) * (
+                    (background_animation_timer - start_position) / (end_position - start_position))
+
+        # Ensure the output is clamped between start_value and end_value
+        output = max(min(output, end_value), start_value)
+
+        # Get the scaled temple image from cache
+        scaled_temple_image = get_scaled_image(output)
+
+        image_width, image_height = scaled_temple_image.get_size()
+
+        # Calculate the position to draw the scaled temple image
+        temple_x = (SCREEN_WIDTH - image_width) // 1.99
+        temple_y = (SCREEN_HEIGHT - image_height) // 1.925
+
+        # Draw the background and scaled temple images
+        screen.blit(background_image, (0, 0))  # Draw the background
+        screen.blit(scaled_temple_image, (temple_x, temple_y))  # Draw the scaled temple image
+
+        background_animation_timer -= 1
+    else:
+        render_background()
+
     render_health_bars()
     render_press_turn_icons()
 
@@ -387,7 +453,7 @@ while running:
     for enemy_sprite in enemies:
         screen.blit(enemy_sprite.sprite,
                     (SCREEN_WIDTH*3//64 + enemy_sprite.id * SCREEN_WIDTH*3.5//16 + enemy_sprite.sprite_x,
-                     SCREEN_HEIGHT//11 + enemy_sprite.sprite_y))
+                     SCREEN_HEIGHT//5 + enemy_sprite.sprite_y))
         enemy_sprite.update_position()     # enemy movement animation
 
     if current_state == PLAYER_TURN_START:
@@ -630,9 +696,11 @@ while running:
             current_state = ENEMY_TURN
 
     elif current_state == VICTORY_STATE:
-        render_primary_text("You win!")
-        pygame.mixer.music.stop()
-        pass
+        if render_primary_text("You win!"):
+            enemies = [monster.Monster(random.randint(0, 3), monster_refs["Hellpack"], 10 + battle_count)]
+            battle_count += 1
+            background_animation_timer = 3
+            current_state = PLAYER_TURN_START
 
     elif current_state == DEFEAT_STATE:
         render_primary_text("Game Over")
