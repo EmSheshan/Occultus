@@ -88,6 +88,27 @@
         "azoth": "neutral",
         "nigredo": "neutral"
       }
+      },{
+      "name": "Psycorvus",
+      "attributes": {
+        "max_hp": 20,
+        "max_mp": 80,
+        "strength": 50,
+        "magic": 60,
+        "vitality": 30,
+        "agility": 90,
+        "luck": 30,
+        "moves": ["Punch", "Killer Strike", "Healing"]
+      },
+      "weakness": {
+        "phys": "neutral",
+        "brimstone": "weak",
+        "mercury": "resist",
+        "miasma": "neutral",
+        "sanguine": "neutral",
+        "azoth": "reflect",
+        "nigredo": "weak"
       }
+    }
   ]
 }

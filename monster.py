@@ -1,4 +1,5 @@
 import math
+import random
 from math import ceil
 import pygame
 import roman
@@ -24,7 +25,7 @@ class Monster:
     def __init__(self, m_id, monster_ref, level):
         self.id = m_id
         r = roman.toRoman(m_id + 1)
-        self.name = monster_ref.name + " " + r.lower()
+        self.name = monster_ref.name
         self.level = level
         self.max_hp = ceil(monster_ref.max_hp * level / 25)
         self.hp = self.max_hp
@@ -38,6 +39,7 @@ class Monster:
         self.moves = monster_ref.moves
         self.weakness = monster_ref.weakness
         self.is_defending = False
+        self.exp = level ** 3
 
         self.original_sprite = monster_ref.sprite
         self.tinted_sprite = self.original_sprite.copy()  # Create a copy of the original sprite
@@ -47,10 +49,21 @@ class Monster:
         self.sprite_y = 0  # Initial vertical position
         self.sprite_x = 0
         self.fadeout = False
+        self.offset = random.randint(0, 1000)
+
+    def level_up(self, monster_ref):
+        self.level += 1
+        self.max_hp = math.ceil(monster_ref.max_hp * self.level / 25)
+        self.max_mp = math.ceil(monster_ref.max_mp * self.level / 25)
+        self.strength = math.ceil(monster_ref.strength * self.level / 25)
+        self.magic = math.ceil(monster_ref.magic * self.level / 25)
+        self.vitality = math.ceil(monster_ref.vitality * self.level / 25)
+        self.agility = math.ceil(monster_ref.agility * self.level / 25)
+        self.luck = math.ceil(monster_ref.luck * self.level / 25)
 
     def update_position(self):
         # Slight vertical bobbing motion
-        self.sprite_y = self.sprite_y + 0.2 * math.sin(pygame.time.get_ticks() * 0.002)
+        self.sprite_y = self.sprite_y + 0.2 * math.sin((pygame.time.get_ticks() + self.offset) * 0.002)
 
         # Check if the enemy is currently shaking
         if self.shake_timer == 0:

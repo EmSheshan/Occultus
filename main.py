@@ -22,26 +22,28 @@ pygame.display.set_caption("Occultus - DEV")
 font_size = round(36 * (SCREEN_WIDTH / 1920))
 font = pygame.font.Font('assets/Mono a Mano.ttf', font_size)
 
-background_image = pygame.image.load("assets/Background.png")
-temple_image = pygame.image.load("assets/Temple.png")
-
-temple_image = pygame.transform.smoothscale(temple_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
+background_image = pygame.image.load("assets/Background.png").convert()
+temple_image = pygame.image.load("assets/Temple.png").convert_alpha()
+shadow_image = pygame.image.load("assets/Shadow.png").convert_alpha()
+background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+temple_image = pygame.transform.scale(temple_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+shadow_image = pygame.transform.scale(shadow_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Before the game loop
 background_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Create a surface to render the background
 background_surface.blit(background_image, (0, 0))  # Blit the background image onto the surface
 background_surface.blit(temple_image, (0, 0))
+background_surface.blit(shadow_image, (0, 0))
 
 
 whole_icon_surface = pygame.image.load('assets/press_icon_full.png')
 half_icon_surface = pygame.image.load('assets/press_icon_half.png')
 
 # Game audio
-mp3_file = "assets/33. World of Greed.mp3"  # Replace with your MP3 file path
+mp3_file = "assets/Sky Searcher.mp3"  # Replace with your MP3 file path
 pygame.mixer.music.load(mp3_file)
-pygame.mixer.music.play()
-pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.8)
 
 # Load sound effects
 click_sound = pygame.mixer.Sound("assets/click.wav")
@@ -79,13 +81,8 @@ def render_health_bars():
                                    (255, 255, 255))
         screen.blit(text_surface, (MARGIN, MARGIN + i * MARGIN*2))
 
-    for i, e in enumerate(enemies):
-        text_surface = font.render(f"Current floor: {battle_count}", True, (255, 255, 255))
-        screen.blit(text_surface, (SCREEN_WIDTH - text_surface.get_width() - MARGIN, MARGIN + i * MARGIN*2))
-
-    text_surface = font.render(f"fps: {pygame.time.get_ticks()}", True, (255, 255, 255))
-    text_rect = text_surface.get_rect(bottomright=(SCREEN_WIDTH - MARGIN, SCREEN_HEIGHT - MARGIN))
-    screen.blit(text_surface, text_rect)
+    text_surface = font.render(f"Current floor: {battle_count}", True, (255, 255, 255))
+    screen.blit(text_surface, (SCREEN_WIDTH - text_surface.get_width() - MARGIN, MARGIN))
 
 
 def render_primary_text(text, confirm=True):
@@ -111,17 +108,12 @@ def render_primary_text(text, confirm=True):
 def render_press_turn_icons():
     text_surface = font.render("", True, (255, 255, 255))
     text_rect = text_surface.get_rect(topleft=(SCREEN_WIDTH // 1.8, MARGIN))  # Adjusted position to top center
-
-    # Calculate the number of whole icons and half icons
-    whole_icons = whole_press_turn_count
-    half_icon = half_press_turn_count
-
     spacing = MARGIN//4
-    for i in range(whole_icons):
+    for i in range(whole_press_turn_count):
         screen.blit(whole_icon_surface, (SCREEN_WIDTH // 1.8 + i * (whole_icon_surface.get_width() + spacing), MARGIN))
-    if half_icon:
-        screen.blit(half_icon_surface,
-                    (SCREEN_WIDTH // 1.8 + whole_icons * (whole_icon_surface.get_width() + spacing), MARGIN))
+    for i in range(half_press_turn_count):
+        screen.blit(half_icon_surface, (SCREEN_WIDTH // 1.8 + (whole_press_turn_count+i) *
+                                        (half_icon_surface.get_width() + spacing), MARGIN))
     screen.blit(text_surface, text_rect)
 
 
@@ -208,8 +200,7 @@ def calculate_damage(attacker, attack_move, whole_press_turn, half_press_turn):
     if attack_move.element == "phys":
         hurt_sound.play()
         damage = int(attacker.strength * attack_move.power)
-        # Check for critical hit
-        if random.random() < attack_move.critrate * 0.05 + attacker.luck / 100:
+        if random.random() < attack_move.critrate * 0.05 + attacker.luck / 100:    # Check for critical hit
             damage = int(damage * 1.5)
             if whole_press_turn > 0:
                 whole_press_turn -= 1
@@ -222,7 +213,7 @@ def calculate_damage(attacker, attack_move, whole_press_turn, half_press_turn):
                 half_press_turn -= 1
             else:
                 whole_press_turn -= 1
-    else:
+    else:   # Magic attack
         spell_sound.play()
         damage = attacker.magic * attack_move.power
     return whole_press_turn, half_press_turn, int(damage), is_crit
@@ -277,7 +268,6 @@ def attack(self, target, damage, element, whole_press_turn, half_press_turn, is_
         target.hp -= int(damage_taken)
         message += f"{target.name} took {damage_taken} damage!"
         target.shake_timer = 15
-
         if target.hp < 0:
             target.hp = 0
     return whole_press_turn, half_press_turn, message
@@ -337,9 +327,15 @@ for move_data in data["moves"]:
 characters = [
     monster.Monster(0, monster_refs["Hellpack"], 50),
     monster.Monster(1, monster_refs["Hellpack"], 12),
+    monster.Monster(2, monster_refs["Black Unicorn"], 10),
+    monster.Monster(3, monster_refs["Bathycanth"], 1)
 ]
 enemies = [
+    monster.Monster(0, monster_refs["Psycorvus"], 12),
+    monster.Monster(1, monster_refs["Hellpack"], 12),
+    monster.Monster(2, monster_refs["Psycorvus"], 12),
     monster.Monster(3, monster_refs["Hellpack"], 12)
+
 ]
 
 # Define game states
@@ -362,6 +358,8 @@ ENEMY_CALCULATE_DAMAGE = 15
 ENEMY_CRITICAL_HIT = 16
 ENEMY_HEAL_TEXT = 17
 ENEMY_DEAL_HEALING = 18
+LEVEL_UP = 19
+ENEMY_DEFEAT_2 = 20
 
 current_state = 0
 whole_press_turn_count = 0
@@ -402,15 +400,7 @@ start_position = 10
 end_position = 0
 start_value = 1
 end_value = 3.5
-num_steps = 10  # Number of steps from start_value to end_value
-
-for i in range(num_steps + 1):
-    scale_factor = 1 + (end_value - 1) * (i / num_steps)
-    scaled_image = pygame.transform.smoothscale(temple_image, (
-        int(temple_image.get_width() * scale_factor),
-        int(temple_image.get_height() * scale_factor)
-    ))
-    scaled_images_cache[scale_factor] = scaled_image
+num_steps = 8  # Number of steps from start_value to end_value
 
 
 # Game loop
@@ -440,6 +430,7 @@ while running:
         # Draw the background and scaled temple images
         screen.blit(background_image, (0, 0))  # Draw the background
         screen.blit(scaled_temple_image, (temple_x, temple_y))  # Draw the scaled temple image
+        screen.blit(shadow_image, (0, 0))
 
         background_animation_timer -= 1
     else:
@@ -447,7 +438,6 @@ while running:
 
     render_health_bars()
     render_press_turn_icons()
-
     SELECT_COLOR = pulsate_color()
 
     for enemy_sprite in enemies:
@@ -559,21 +549,17 @@ while running:
             whole_press_turn_count, half_press_turn_count, attack_damage, is_critical_hit = calculate_damage(
                 character, selected_move, whole_press_turn_count, half_press_turn_count,)
             if is_critical_hit:
-                current_state = PLAYER_CRITICAL_HIT
+                whole_press_turn_count, half_press_turn_count, attack_message = \
+                    attack(character, selected_target, attack_damage, selected_move.element, whole_press_turn_count,
+                           half_press_turn_count, is_critical_hit)
+                attack_message = "Critical hit! " + attack_message
+                current_state = PLAYER_DEAL_DAMAGE
             else:
                 whole_press_turn_count, half_press_turn_count, attack_message = \
                     attack(character, selected_target, attack_damage, selected_move.element, whole_press_turn_count,
                            half_press_turn_count, is_critical_hit)
 
                 current_state = PLAYER_DEAL_DAMAGE
-
-    elif current_state == PLAYER_CRITICAL_HIT:
-        if render_primary_text("Critical Hit!"):
-            whole_press_turn_count, half_press_turn_count, attack_message = \
-                attack(character, selected_target, attack_damage, selected_move.element, whole_press_turn_count,
-                       half_press_turn_count, is_critical_hit)
-
-            current_state = PLAYER_DEAL_DAMAGE
 
     elif current_state == PLAYER_DEAL_DAMAGE:
         if render_primary_text(attack_message):
@@ -589,13 +575,34 @@ while running:
             else:
                 current_state = SELECT_MOVE
 
+    elif current_state == LEVEL_UP:
+        if render_primary_text(f"{i.name} reached level {i.level + 1}! "):
+            i.level_up(monster_refs[i.name])
+            current_state = ENEMY_DEFEAT_2
+
     elif current_state == ENEMY_DEFEAT:
         if render_primary_text(f"{enemies[enemy_index].name} has been defeated."):
+            alive_characters = [character for character in characters if character.hp > 0]
+            for i in alive_characters:
+                i.exp += int(enemies[enemy_index].exp ** 0.8 // len(alive_characters))
+            current_state = ENEMY_DEFEAT_2
+
+    elif current_state == ENEMY_DEFEAT_2:
+        for i in alive_characters:
+            if i.exp > (i.level+1) ** 3:
+                current_state = LEVEL_UP
+                break
+        if current_state != LEVEL_UP:
             enemies.pop(enemy_index)
             if not enemies:
                 whole_press_turn_count = 0
                 half_press_turn_count = 0
                 current_state = VICTORY_STATE
+            elif enemies_to_hit > 1:
+                enemies_to_hit -= 1
+                is_damage_calculated = False
+                attack_damage = 0
+                current_state = PLAYER_CALCULATE_ATTACK
             else:
                 current_state = SELECT_MOVE
 
@@ -629,8 +636,9 @@ while running:
                     target_character = random.choice([character for character in characters if character.hp > 0])
                     current_state = ENEMY_CALCULATE_DAMAGE
                 elif enemy_move.target == "enemy_all":
-                    characters_to_hit = len(characters)
-                    target_character = characters[len(characters) - characters_to_hit]
+                    alive_characters = [character for character in characters if character.hp > 0]
+                    characters_to_hit = len(alive_characters)
+                    target_character = characters[len(alive_characters) - characters_to_hit]
                     current_state = ENEMY_CALCULATE_DAMAGE
             elif enemy_move.type == "heal":
                 characters_needing_healing = [character for character in enemies if character.hp < character.max_hp]
@@ -665,7 +673,7 @@ while running:
         if characters_to_hit > 1:
             if render_primary_text(attack_message):
                 characters_to_hit -= 1
-                target_character = characters[len(characters) - characters_to_hit]
+                target_character = characters[len(alive_characters) - characters_to_hit]
                 current_state = ENEMY_CALCULATE_DAMAGE
             if all(character.hp <= 0 for character in characters):
                 render_primary_text("Defeated!", False)
@@ -699,7 +707,7 @@ while running:
         if render_primary_text("You win!"):
             enemies = [monster.Monster(random.randint(0, 3), monster_refs["Hellpack"], 10 + battle_count)]
             battle_count += 1
-            background_animation_timer = 3
+            background_animation_timer = num_steps
             current_state = PLAYER_TURN_START
 
     elif current_state == DEFEAT_STATE:
